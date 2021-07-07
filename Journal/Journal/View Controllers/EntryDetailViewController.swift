@@ -19,6 +19,7 @@ class EntryDetailViewController: UIViewController {
     }
     
     @IBOutlet weak var titleTextField: UITextField!
+    @IBOutlet weak var moodController: UISegmentedControl!
     @IBOutlet weak var bodytextTextField: UITextView!
     
     override func viewDidLoad() {
@@ -34,15 +35,19 @@ class EntryDetailViewController: UIViewController {
             !title.isEmpty else { return }
         let bodytext = bodytextTextField.text ?? ""
         
+        let moodIndex = moodController.selectedSegmentIndex
+        let mood = Mood.allMoods[moodIndex]
+        
         // if an existing entry was passed from the tableview, the updates are saved
         if let entry = entry {
             entry.title = title
             entry.bodyText = bodytext
+            entry.mood = mood.rawValue
             entryController?.updateEntry(for: entry)
             navigationController?.popViewController(animated: true)
         } else {
-            // if it is a new entry, an new Entry object is creted and saved to the array.
-            let entry = Entry(title: title, bodyText: bodytext, timestamp: Date())
+            // if it is a new entry, a new Entry object is creted and saved to the array.
+            let entry = Entry(title: title, mood: mood, bodyText: bodytext, timestamp: Date())
             entryController?.createEntry(for: entry)
             navigationController?.popViewController(animated: true)
         }
@@ -54,7 +59,18 @@ class EntryDetailViewController: UIViewController {
         
         title = entry?.title ?? "Create Entry"
         titleTextField.text = entry?.title
+        
+        let newMood: Mood
+        if let moodSelected = entry?.mood {
+            newMood = Mood(rawValue: moodSelected)!
+        } else {
+            newMood = .meh
+        }
+        
+        moodController.selectedSegmentIndex = Mood.allMoods.firstIndex(of: newMood)!
+        
         bodytextTextField.text = entry?.bodyText
     }
     
 }
+
